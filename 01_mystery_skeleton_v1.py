@@ -81,3 +81,5 @@ class Game:
 # Main Routine
 if __name__ == "__main__":
     root= Tk() 
+    something = Start(root)
+    root.mainloop()
