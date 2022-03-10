@@ -155,6 +155,9 @@ class Game:
         self.multiplier = IntVar()
         self.multiplier.set(stakes)
 
+        self.rounds_played = IntVar()
+        self.rounds_played.set(0)
+
         # List for holding statistics
         self.round_stats_list = []
 
@@ -234,6 +237,7 @@ class Game:
 
     def reveal_boxes(self):
         # retrieve the balance from the initial function
+        rounds = self.rounds_played.get()
         current_balance = self.balance.get()
         stakes_multiplier = self.multiplier.get()
 
@@ -249,23 +253,27 @@ class Game:
                 prize_list = "gold (${})".format(5* stakes_multiplier)
                 round_winnings += 5 * stakes_multiplier
 
+
             elif 5 < prize_num <=25:
                 prize = PhotoImage(file="Mystery_box_images/silver_low.gif")
                 prize_list = "silver (${})".format(2* stakes_multiplier)
                 round_winnings += 2 * stakes_multiplier
+
             
             elif 25 < prize_num <=65:
                 prize = PhotoImage(file="Mystery_box_images/copper_low.gif")
                 prize_list = "copper (${})".format(1* stakes_multiplier)
                 round_winnings += stakes_multiplier
+
             else:
                 prize = PhotoImage(file="Mystery_box_images/lead.gif")
                 prize_list = "lead ($0)"
-                
 
 
+            rounds + 1
             prizes.append(prize)
             stats_prizes.append(prize_list)
+            
 
         photo1 = prizes[0]
         photo2 = prizes[1]
@@ -299,6 +307,8 @@ class Game:
                                      5 * stakes_multiplier, round_winnings, current_balance)
         self.round_stats_list.append(round_summary)
         print(self.round_stats_list)
+        print(rounds)
+
 
         
         self.stats_button = Button(self.help_export_frame, text="Game Stats", font=("Arial 14 bold"),
@@ -326,6 +336,12 @@ class Game:
     def help(self):
         get_help = Help(self)
         get_help.help_text.configure(text="Help text goes here")
+
+    def stats(self, calc_stats):
+        Stats(self, calc_stats)
+        
+    
+
         
 class Help:
     def __init__(self, partner):
@@ -366,9 +382,7 @@ class Help:
         partner.help_button.config(state=NORMAL)
         self.help_box.destroy()
     
-    def Stats(self, calc_stats):
-        Stats(self, calc_stats)
-        
+   
 class Stats:
     def __init__(self, partner, calc_stats):
 
@@ -450,5 +464,6 @@ class Stats:
 # Main Routine
 if __name__ == "__main__":
     root= Tk() 
+    root.title("Mystery Box Game")
     something = Start(root)
     root.mainloop()
