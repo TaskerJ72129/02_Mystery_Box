@@ -224,9 +224,9 @@ class Game:
         self.help_export_frame = Frame(self.game_frame)
         self.help_export_frame.grid(row=5, pady=10)
 
-        self.help_button = Button(self.help_export_frame, text="Help / Rules",
+        self.help_button = Button(self.help_export_frame, text="Help",
                                   font="Arial 14 bold", bg="#808080", fg="white",
-                                  command=self.help)
+                                  command=self.to_help)
         self.help_button.grid(row=0, column=1, padx=2)
 
         # Quit Button
@@ -333,7 +333,7 @@ class Game:
     def to_quit(self):
         root.destroy()
 
-    def help(self):
+    def to_help(self):
         get_help = Help(self)
         get_help.help_text.configure(text="Help text goes here")
 
