@@ -1,6 +1,7 @@
 from tkinter import *
 from functools import partial # To prevent unwanted windows
 import random
+import re
 
 
 class Start:
@@ -522,8 +523,68 @@ class GameStats:
 
             # Warning text (label, row 2)
             self.export_text = Label(self.export_frame, text="If the filename you enter already exists it will be replaced"
-                                     ,justify=LEFT, width=40, wrap=250)
-            self.export_text.grid(row=1)
+                                     ,justify=LEFT, bg="ffafaf", fg="maroon", font="Arail 10 italic",
+                                     wrap=225, padx=10, pady=10)
+            self.export_text.grid(row=2, pady=10)
+
+            # Filename Entry Box (row 3)
+            self.filename_entry = Entry(self.export_frame, width=20, font="Arial 14 bold",
+                                        justify=CENTER)
+            self.filename_entry.grid(row=3, pady=10)
+
+            # Error Message Labels (initially blank, row 4)
+            self.save_error_label = Label(self.export_frame, text="", fg="maroon")
+            self.save_error_label.grid(row=4)
+
+            # Save / Cancel Frame (row 5)
+            self.save_cancel_frame = Frame(self.export_frame)
+            self.save_cancel_frame.grid(row=5, pady=10)
+
+            # Save and Cancel buttons (row 0 of save_cancel_frame)
+            self.save_button = Button(self.save_cancel_frame, text="Save", font="Arial 15 bold",
+                                      bg="#003366", fg="white",
+                                      command=partial(lambda: self.save_history(partner, game_history, all_game_satats)))
+            self.save_button.grid(row=0, column=0)
+
+            self.cancel_button = Button(self.save_cancel_frame, text="Cancel", font="Arial 15 bold",
+                                        bg="#660000", fg="white", 
+                                        command=partial(self.close_export, partner))
+            self.cancel_button.grid(row=0, column=1)
+
+        def save_history(self, partner, game_history, game_stats):
+
+            # Regular expression to chack filename is valid
+            valid_char = "[A-Za-z0-9_]"
+            has_error = "no"
+
+            filename = self.filename_entry.get()
+            print(filename)
+
+            for letter in filename:
+                if re.match(valid_char, letter):
+                    continue
+
+                elif letter == " ":
+                    problem = "(no spaces allowed)"
+
+                else:
+                    problem = ("(no {}'s allowed)".format(letter))
+                has_error = "yes"
+                break
+
+            if filename == "":
+                problem = "can't be blank"
+                has_error = "yes"
+
+            if has_error == "yes":
+                # Display error message
+                self.save_error_label.config(text="invalid filename - {}".format(problem))
+                # Change entry box background to pink
+                self.filename_entry.config(bg="ffafaf")
+                print()
+
+
+
 
 
 
