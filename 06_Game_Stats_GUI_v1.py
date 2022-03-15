@@ -4,7 +4,7 @@ import random
 
  
 class Game:
-    def __init__(self, partner, stakes, starting_balance):
+    def __init__(self):
         
         # Formatting variables
         self.game_stats_list = [50, 6]
@@ -20,7 +20,7 @@ class Game:
                                    font="Arial 24 bold", padx=10, pady=10)
         self.heading_label.grid(row=0)
 
-        # History Button (row 1)
+        # Stats Button (row 1)
         self.stats_button = Label(self.game_frame, text="Game Stats",
                                    font="Arial 14 bold", padx=10, pady=10,
                                    command=lambda: self.to_stats(self.round_stats_list))
@@ -104,9 +104,19 @@ class GameStats:
                                      font=heading, anchor="e")
         self.win_loss_label.grid(row=2, column=0, padx=0)
 
-        self.win_loss_value_label = Label(self.details_frame, text="${}".format(amount),
+        self.win_loss_value_label = Label(self.details_frame, text="$ {}".format(amount),
                                      font=content, anchor="w")
         self.win_loss_value_label.grid(row=2, column=1, padx=0)
+
+        # Rounds Played (row 2.4)
+        self.games_played_label = Label(self.details_frame, text="Rounds Played",
+                                        font=heading, anchor="e")
+        self.games_played_label.grid(row=4, column=0, padx=0)
+
+        self.games_played_value_label = Label(self.details_frame, text=len(game_history),
+                                        font=content, anchor="w")
+        self.games_played_value_label.grid(row=4, column=1, padx=0)
+
 
 
 
@@ -233,5 +243,5 @@ class Stats:
 if __name__ == "__main__":
     root= Tk() 
     root.title("Mystery Box Game")
-    something = Start(root)
+    something = Game(root)
     root.mainloop()

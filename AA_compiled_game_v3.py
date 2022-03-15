@@ -155,11 +155,9 @@ class Game:
         self.multiplier = IntVar()
         self.multiplier.set(stakes)
 
-        self.rounds_played = IntVar()
-        self.rounds_played.set(0)
-
         # List for holding statistics
         self.round_stats_list = []
+        self.game_stats_list=[starting_balance, starting_balance]
 
         # GUI Setup
         self.game_box = Toplevel()
@@ -229,6 +227,12 @@ class Game:
                                   command=self.to_help)
         self.help_button.grid(row=0, column=1, padx=2)
 
+        # Stats button
+        self.stats_button = Button(self.help_export_frame, text="Game Stats", font=("Arial 14 bold"),
+                                   bg="blue", fg="white", 
+                                   command=lambda: self.to_stats(self.round_stats_list))
+        self.stats_button.grid(row=0, column=2, padx=2)
+
         # Quit Button
         self.quit_button = Button(self.game_frame, text="Quit", fg="white",
                                   bg="#660000", font="Arial 15 bold", width=20,
@@ -237,7 +241,6 @@ class Game:
 
     def reveal_boxes(self):
         # retrieve the balance from the initial function
-        rounds = self.rounds_played.get()
         current_balance = self.balance.get()
         stakes_multiplier = self.multiplier.get()
 
@@ -270,7 +273,6 @@ class Game:
                 prize_list = "lead ($0)"
 
 
-            rounds + 1
             prizes.append(prize)
             stats_prizes.append(prize_list)
             
@@ -295,6 +297,8 @@ class Game:
 
         # Set balance to new balance
         self.balance.set(current_balance)
+        # update game_stats_list with current bal
+        self.game_stats_list[1] = current_balance
         
 
         balance_statement = "Game Cost: ${}\nPayback: ${} \n Current Balance: ${}".format(5 * stakes_multiplier,
@@ -307,14 +311,9 @@ class Game:
                                      5 * stakes_multiplier, round_winnings, current_balance)
         self.round_stats_list.append(round_summary)
         print(self.round_stats_list)
-        print(rounds)
 
 
-        
-        self.stats_button = Button(self.help_export_frame, text="Game Stats", font=("Arial 14 bold"),
-                                   bg="blue", fg="white", command=lambda:
-                                   self.stats(self.round_stats_list))
-        self.stats_button.grid(row=0, column=2, padx=2)
+
 
         if len(self.round_stats_list) == 0:
             self.stats_button.config(state=DISABLED)
@@ -337,8 +336,8 @@ class Game:
         get_help = Help(self)
         get_help.help_text.configure(text="Help text goes here")
 
-    def stats(self, calc_stats):
-        Stats(self, calc_stats)
+    def to_stats(self, game_history, game_stats):
+        GameStats(self, game_history, game_stats)
         
     
 
@@ -383,62 +382,95 @@ class Help:
         self.help_box.destroy()
     
    
-class Stats:
-    def __init__(self, partner, calc_stats):
 
-        background = "light blue"
+class GameStats:
+    def __init__(self, partner, game_history, game_stats):
+    
+        print(game_history)
 
-        # disable stats button
+        # disable help button
         partner.stats_button.config(state=DISABLED)
 
-        # Sets up child window (stats box)
+        heading = "Arial 12 bold"
+        content = "Arial 12"
+
+        # Sets up child window (ie: help box)
         self.stats_box = Toplevel()
 
-        # If users press cross at top, closes stats and 'releases' stats button
-        self.stats_box.protocol('WM_DELETE_WINDOW', partial(self.close_stats, partner))
+        # If users press cross at top, closes help and 'releases' help button
+
+        self.stats_protocol('WM_DELETE_WINDOW', partial(self.close_stats, partner))
 
         # Set up GUI Frame
-        self.stats_frame = Frame(self.stats_box, width=300, bg=background)
+        self.stats_frame = Frame(self.stats_box)
         self.stats_frame.grid()
 
-        # Set up stats heading (row 0)
-        self.how_heading = Label(self.stats_frame, text="Calculation Stats",
-                                    font="arial 19 bold", bg=background)
-        self.how_heading.grid(row=0)
+        # Set up stats heading row 0
+        self.stats_heading_label = Label(self.stats_frame, text="Game Statistics",
+                                         font="arial 19 bold")
+        self.stats_heading_label.grid(row=0)
 
-        # stats text (label, row 1)
-        self.stats_text = Label(self.stats_frame, text="Here are your most recent "
-                                                           "calculations. Please use the "
-                                                           "export button to create a text "
-                                                           "file of all your calculations for"
-                                                           "this session",
-                                font="arial 10 italic", fg="maroon",
-                                justify=LEFT, width=40, bg=background,
-                                padx=10, pady=10)
-        self.stats_text.grid(row=1)
+        # To Export <instructions> (row 1)
+        self.export_intructons = Label(self.stats_frame,
+                                       text="instructions go here", wrap=250,
+                                       font="arial 10 italic", justify=LEFT,
+                                       fg="green", padx=10, pady=10)
+        self.export_intructons.grid(row=1)
 
-        # Stats Output goes here... (row 2)
+        # Starting Balance (row 2)
+        self.details_frame = Frame(self.stats_frame)
+        self.details_frame.grid(row=2)
 
-        # Generate string from list of calculations
-        stats_string = ""
+        # Statrting balance (row 2.0)
 
-        if len(calc_stats) >= 7:
-            for item in range(0, 7):
-                stats_string += calc_stats[len(calc_stats) - item - 1]+"\n"
+        self.start_balance_label = Label(self.details_frame,
+                                         text="Starting Balance:", font=heading,
+                                         anchor="e")
+        self.start_balance_label.grid(row=0, column=0, padx=0)
 
+        self.start_balance_value_label = Label(self.details_frame, font=content,
+                                               text="${}".format(game_stats[0]),
+                                               anchor="w")
+        self.start_balance_value_label.grid(row=0, column=1, padx=0)
+
+        # Current Balance (row 2.2)
+        self.current_balance_label = Label(self.details_frame,
+                                         text="Current Balance:", font=heading,
+                                         anchor="e")
+        self.current_balance_label.grid(row=1, column=0, padx=0)
+
+        self.current_balance_value_label = Label(self.details_frame, font=content,
+                                               text="${}".format(game_stats[1]),
+                                               anchor="w")
+        self.current_balance_value_label.grid(row=1, column=1, padx=0) 
+
+        if game_stats[1] > game_stats[0]:
+            win_loss = "Amount Won:"
+            amount = game_stats[1] - game_stats[0]
+            win_loss_fg = "green"
         else:
-            for item in calc_stats:
-                stats_string += calc_stats[len(calc_stats) - calc_stats.index(item) - 1] + "\n"
-                self.stats_text.config(text="Here is your calculation "
-                                              "stats. You can use the "
-                                              "export button to save this "
-                                              "data to a text file if " 
-                                              "desired", wrap=250)
+            win_loss = "Amount Lost:"
+            amount = game_stats[0] - game_stats[1]
+            win_loss_fg = "#660000"
 
-        # Label to display calculation stats to user
-        self.calc_label = Label(self.stats_frame, text=stats_string,
-                                bg=background, font="Arial 12", justify=LEFT)
-        self.calc_label.grid(row=2)
+        # Amount won / lost (row 2.3)
+        self.win_loss_label = Label(self.details_frame, text=win_loss,
+                                     font=heading, anchor="e")
+        self.win_loss_label.grid(row=2, column=0, padx=0)
+
+        self.win_loss_value_label = Label(self.details_frame, text="$ {}".format(amount),
+                                     font=content, anchor="w")
+        self.win_loss_value_label.grid(row=2, column=1, padx=0)
+
+        # Rounds Played (row 2.4)
+        self.games_played_label = Label(self.details_frame, text="Rounds Played",
+                                        font=heading, anchor="e")
+        self.games_played_label.grid(row=4, column=0, padx=0)
+
+        self.games_played_value_label = Label(self.details_frame, text=len(game_history),
+                                        font=content, anchor="w")
+        self.games_played_value_label.grid(row=4, column=1, padx=0)
+
 
         # Export / Dismiss button (row 3)
         self.export_dismiss_frame = Frame(self.stats_frame)
@@ -460,6 +492,40 @@ class Stats:
         # Put stats button back to normal..
         partner.stats_button.config(state=NORMAL)
         self.stats_box.destroy()
+
+    class Export:
+        def __init__(self, partner, game_history, all_game_satats):
+            print(game_history)
+
+            # disable export button
+            partner.export_button.config(state=DISABLED)
+
+            # Sets up child window (ie: export box)
+            self.export_box = Toplevel()
+
+            # If users press cross at top, closes export and releases export button
+            self.export_box.protocol('WM_DELETE_WINDOW', partial(self.close_export, partner))
+
+            # Set up GUI Frame
+            self.export_frame = Frame(self.export_box, width=300)
+            self.export_frame.grid()
+
+            # Set up Export heading (row 0)
+            self.how_heading = Label(self.export_frame, text="Export / Instructions",
+                                     font="arial 14 bold")
+            self.how_heading.grid(row=0)
+
+            # Export Instructions (label, row 1)
+            self.export_text = Label(self.export_frame, text="Enter a filename and press save to make a text file with you calculation history"
+                                     ,justify=LEFT, width=40, wrap=250)
+            self.export_text.grid(row=1)
+
+            # Warning text (label, row 2)
+            self.export_text = Label(self.export_frame, text="If the filename you enter already exists it will be replaced"
+                                     ,justify=LEFT, width=40, wrap=250)
+            self.export_text.grid(row=1)
+
+
 
 # Main Routine
 if __name__ == "__main__":
