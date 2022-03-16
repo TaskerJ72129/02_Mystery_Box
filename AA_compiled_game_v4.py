@@ -1,6 +1,7 @@
 from tkinter import *
 from functools import partial # To prevent unwanted windows
 import random
+import re
 
 
 class Start:
@@ -157,6 +158,7 @@ class Game:
 
         # List for holding statistics
         self.round_stats_list = []
+        self.game_stats_list=[starting_balance, starting_balance]
 
         # GUI Setup
         self.game_box = Toplevel()
@@ -221,10 +223,16 @@ class Game:
         self.help_export_frame = Frame(self.game_frame)
         self.help_export_frame.grid(row=5, pady=10)
 
-        self.help_button = Button(self.help_export_frame, text="Help / Rules",
+        self.help_button = Button(self.help_export_frame, text="Help",
                                   font="Arial 14 bold", bg="#808080", fg="white",
-                                  command=self.help)
+                                  command=self.to_help)
         self.help_button.grid(row=0, column=1, padx=2)
+
+        # Stats button
+        self.stats_button = Button(self.help_export_frame, text="Game Stats", font=("Arial 14 bold"),
+                                   bg="blue", fg="white", 
+                                   command=lambda: self.to_stats(self.round_stats_list))
+        self.stats_button.grid(row=0, column=2, padx=2)
 
         # Quit Button
         self.quit_button = Button(self.game_frame, text="Quit", fg="white",
@@ -241,31 +249,39 @@ class Game:
         prizes = []
         stats_prizes = []
 
+        # Allows photo to change depending on stakes. Lead not in slit because always 0
+        copper = ["02_Mystery_Box/Mystery_box_images/copper_low.gif", "02_Mystery_Box/Mystery_box_images/copper_med.gif", "02_Mystery_Box/Mystery_box_images/copper_high.gif"]
+        silver = ["02_Mystery_Box/Mystery_box_images/silver_low.gif", "02_Mystery_Box/Mystery_box_images/silver_med.gif", "02_Mystery_Box/Mystery_box_images/silver_high.gif"]
+        gold = ["02_Mystery_Box/Mystery_box_images/gold_low.gif", "02_Mystery_Box/Mystery_box_images/gold_med.gif", "02_Mystery_Box/Mystery_box_images/gold_high.gif"]
+
         for item in range(0, 3):
             prize_num = random.randint(1,100)
 
             if 0 < prize_num <=5:
-                prize = PhotoImage(file="02_Mystery_Box/Mystery_box_images/gold_low.gif")
+                prize = PhotoImage(file=gold[stakes_multiplier-1])
                 prize_list = "gold (${})".format(5* stakes_multiplier)
                 round_winnings += 5 * stakes_multiplier
 
+
             elif 5 < prize_num <=25:
-                prize = PhotoImage(file="02_Mystery_Box/Mystery_box_images/silver_low.gif")
+                prize = PhotoImage(file=silver[stakes_multiplier-1])
                 prize_list = "silver (${})".format(2* stakes_multiplier)
                 round_winnings += 2 * stakes_multiplier
+
             
             elif 25 < prize_num <=65:
-                prize = PhotoImage(file="02_Mystery_Box/Mystery_box_images/copper_low.gif")
+                prize = PhotoImage(file=copper[stakes_multiplier-1])
                 prize_list = "copper (${})".format(1* stakes_multiplier)
                 round_winnings += stakes_multiplier
+
             else:
                 prize = PhotoImage(file="02_Mystery_Box/Mystery_box_images/lead.gif")
                 prize_list = "lead ($0)"
-                
 
 
             prizes.append(prize)
             stats_prizes.append(prize_list)
+            
 
         photo1 = prizes[0]
         photo2 = prizes[1]
@@ -287,6 +303,8 @@ class Game:
 
         # Set balance to new balance
         self.balance.set(current_balance)
+        # update game_stats_list with current bal
+        self.game_stats_list[1] = current_balance
         
 
         balance_statement = "Game Cost: ${}\nPayback: ${} \n Current Balance: ${}".format(5 * stakes_multiplier,
@@ -298,7 +316,13 @@ class Game:
                         "${}".format(stats_prizes[0], stats_prizes[1], stats_prizes[2],
                                      5 * stakes_multiplier, round_winnings, current_balance)
         self.round_stats_list.append(round_summary)
-        # print(self.round_stats_list)
+        print(self.round_stats_list)
+
+
+
+
+        if len(self.round_stats_list) == 0:
+            self.stats_button.config(state=DISABLED)
 
         # Edit label so user can see their balance
         self.balance_label.configure(text=balance_statement)
@@ -314,9 +338,15 @@ class Game:
     def to_quit(self):
         root.destroy()
 
-    def help(self):
+    def to_help(self):
         get_help = Help(self)
         get_help.help_text.configure(text="Help text goes here")
+
+    def to_stats(self, game_history, game_stats):
+        GameStats(self, game_history, game_stats)
+        
+    
+
         
 class Help:
     def __init__(self, partner):
@@ -357,8 +387,239 @@ class Help:
         partner.help_button.config(state=NORMAL)
         self.help_box.destroy()
     
+   
+
+class GameStats:
+    def __init__(self, partner, game_history, game_stats):
+    
+        print(game_history)
+
+        # disable help button
+        partner.stats_button.config(state=DISABLED)
+
+        heading = "Arial 12 bold"
+        content = "Arial 12"
+
+        # Sets up child window (ie: help box)
+        self.stats_box = Toplevel()
+
+        # If users press cross at top, closes help and 'releases' help button
+
+        self.stats_protocol('WM_DELETE_WINDOW', partial(self.close_stats, partner))
+
+        # Set up GUI Frame
+        self.stats_frame = Frame(self.stats_box)
+        self.stats_frame.grid()
+
+        # Set up stats heading row 0
+        self.stats_heading_label = Label(self.stats_frame, text="Game Statistics",
+                                         font="arial 19 bold")
+        self.stats_heading_label.grid(row=0)
+
+        # To Export <instructions> (row 1)
+        self.export_intructons = Label(self.stats_frame,
+                                       text="instructions go here", wrap=250,
+                                       font="arial 10 italic", justify=LEFT,
+                                       fg="green", padx=10, pady=10)
+        self.export_intructons.grid(row=1)
+
+        # Starting Balance (row 2)
+        self.details_frame = Frame(self.stats_frame)
+        self.details_frame.grid(row=2)
+
+        # Statrting balance (row 2.0)
+
+        self.start_balance_label = Label(self.details_frame,
+                                         text="Starting Balance:", font=heading,
+                                         anchor="e")
+        self.start_balance_label.grid(row=0, column=0, padx=0)
+
+        self.start_balance_value_label = Label(self.details_frame, font=content,
+                                               text="${}".format(game_stats[0]),
+                                               anchor="w")
+        self.start_balance_value_label.grid(row=0, column=1, padx=0)
+
+        # Current Balance (row 2.2)
+        self.current_balance_label = Label(self.details_frame,
+                                         text="Current Balance:", font=heading,
+                                         anchor="e")
+        self.current_balance_label.grid(row=1, column=0, padx=0)
+
+        self.current_balance_value_label = Label(self.details_frame, font=content,
+                                               text="${}".format(game_stats[1]),
+                                               anchor="w")
+        self.current_balance_value_label.grid(row=1, column=1, padx=0) 
+
+        if game_stats[1] > game_stats[0]:
+            win_loss = "Amount Won:"
+            amount = game_stats[1] - game_stats[0]
+            win_loss_fg = "green"
+        else:
+            win_loss = "Amount Lost:"
+            amount = game_stats[0] - game_stats[1]
+            win_loss_fg = "#660000"
+
+        # Amount won / lost (row 2.3)
+        self.win_loss_label = Label(self.details_frame, text=win_loss,
+                                     font=heading, anchor="e")
+        self.win_loss_label.grid(row=2, column=0, padx=0)
+
+        self.win_loss_value_label = Label(self.details_frame, text="$ {}".format(amount),
+                                     font=content, anchor="w")
+        self.win_loss_value_label.grid(row=2, column=1, padx=0)
+
+        # Rounds Played (row 2.4)
+        self.games_played_label = Label(self.details_frame, text="Rounds Played",
+                                        font=heading, anchor="e")
+        self.games_played_label.grid(row=4, column=0, padx=0)
+
+        self.games_played_value_label = Label(self.details_frame, text=len(game_history),
+                                        font=content, anchor="w")
+        self.games_played_value_label.grid(row=4, column=1, padx=0)
+
+
+        # Export / Dismiss button (row 3)
+        self.export_dismiss_frame = Frame(self.stats_frame)
+        self.export_dismiss_frame.grid(row=3, pady=10)
+
+        # Export Button
+        self.export_button = Button(self.export_dismiss_frame, text="Export",
+                                    font="arial 10 bold",
+                                    command=lambda: self.export(calc_stats))
+        self.export_button.grid(row=0, column=0)
+
+        # Dismiss Button
+        self.dismiss_button = Button(self.export_dismiss_frame, text="Dismiss",
+                                    font="arial 10 bold",
+                                    command=partial(self.close_stats, partner))
+        self.dismiss_button.grid(row=0, column=1)
+
+    def close_stats(self, partner):
+        # Put stats button back to normal..
+        partner.stats_button.config(state=NORMAL)
+        self.stats_box.destroy()
+
+    class Export:
+        def __init__(self, partner, game_history, all_game_satats):
+            print(game_history)
+
+            # disable export button
+            partner.export_button.config(state=DISABLED)
+
+            # Sets up child window (ie: export box)
+            self.export_box = Toplevel()
+
+            # If users press cross at top, closes export and releases export button
+            self.export_box.protocol('WM_DELETE_WINDOW', partial(self.close_export, partner))
+
+            # Set up GUI Frame
+            self.export_frame = Frame(self.export_box, width=300)
+            self.export_frame.grid()
+
+            # Set up Export heading (row 0)
+            self.how_heading = Label(self.export_frame, text="Export / Instructions",
+                                     font="arial 14 bold")
+            self.how_heading.grid(row=0)
+
+            # Export Instructions (label, row 1)
+            self.export_text = Label(self.export_frame, text="Enter a filename and press save to make a text file with you calculation history"
+                                     ,justify=LEFT, width=40, wrap=250)
+            self.export_text.grid(row=1)
+
+            # Warning text (label, row 2)
+            self.export_text = Label(self.export_frame, text="If the filename you enter already exists it will be replaced"
+                                     ,justify=LEFT, bg="ffafaf", fg="maroon", font="Arail 10 italic",
+                                     wrap=225, padx=10, pady=10)
+            self.export_text.grid(row=2, pady=10)
+
+            # Filename Entry Box (row 3)
+            self.filename_entry = Entry(self.export_frame, width=20, font="Arial 14 bold",
+                                        justify=CENTER)
+            self.filename_entry.grid(row=3, pady=10)
+
+            # Error Message Labels (initially blank, row 4)
+            self.save_error_label = Label(self.export_frame, text="", fg="maroon")
+            self.save_error_label.grid(row=4)
+
+            # Save / Cancel Frame (row 5)
+            self.save_cancel_frame = Frame(self.export_frame)
+            self.save_cancel_frame.grid(row=5, pady=10)
+
+            # Save and Cancel buttons (row 0 of save_cancel_frame)
+            self.save_button = Button(self.save_cancel_frame, text="Save", font="Arial 15 bold",
+                                      bg="#003366", fg="white",
+                                      command=partial(lambda: self.save_history(partner, game_history, all_game_satats)))
+            self.save_button.grid(row=0, column=0)
+
+            self.cancel_button = Button(self.save_cancel_frame, text="Cancel", font="Arial 15 bold",
+                                        bg="#660000", fg="white", 
+                                        command=partial(self.close_export, partner))
+            self.cancel_button.grid(row=0, column=1)
+
+        def save_history(self, partner, game_history, game_stats):
+
+            # Regular expression to chack filename is valid
+            valid_char = "[A-Za-z0-9_]"
+            has_error = "no"
+
+            filename = self.filename_entry.get()
+            print(filename)
+
+            for letter in filename:
+                if re.match(valid_char, letter):
+                    continue
+
+                elif letter == " ":
+                    problem = "(no spaces allowed)"
+
+                else:
+                    problem = ("(no {}'s allowed)".format(letter))
+                has_error = "yes"
+                break
+
+            if filename == "":
+                problem = "can't be blank"
+                has_error = "yes"
+
+            if has_error == "yes":
+                # Display error message
+                self.save_error_label.config(text="invalid filename - {}".format(problem))
+                # Change entry box background to pink
+                self.filename_entry.config(bg="ffafaf")
+                print()
+            
+            else:
+                # If there are no errors, generate text file and close dialogue add .txt suffix
+                filename = filename = ".txt"
+
+                # create file to hold data
+                f = open(filename, "w+")
+
+                # Heading for Stats
+                f.write("Game Statistics\n\n")
+
+                # Game stats
+                for round in game_stats:
+                    f.write(round + "\n")
+
+                # Heading for Rounds
+                f.write("\nRound Details\n\n")
+
+                # add new line at end of each item
+                for item in game_history:
+                    f.wite(item + "\n")
+
+                # close file
+                f.close()
+
+
+
+
+
+
 # Main Routine
 if __name__ == "__main__":
     root= Tk() 
+    root.title("Mystery Box Game")
     something = Start(root)
     root.mainloop()

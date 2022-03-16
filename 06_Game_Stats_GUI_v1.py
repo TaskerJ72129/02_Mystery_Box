@@ -3,6 +3,7 @@ from functools import partial # To prevent unwanted windows
 import random
 
  
+
 class Game:
     def __init__(self):
         
@@ -117,6 +118,16 @@ class GameStats:
                                         font=content, anchor="w")
         self.games_played_value_label.grid(row=4, column=1, padx=0)
 
+        # Dismiss Button
+        self.dismiss_button = Button(self.export_dismiss_frame, text="Dismiss",
+                                    font="arial 10 bold",
+                                    command=partial(self.close_stats, partner))
+        self.dismiss_button.grid(row=0, column=1)
+
+    def close_stats(self, partner):
+        # Put stats button back to normal..
+        partner.stats_button.config(state=NORMAL)
+        self.stats_box.destroy()
 
 
 
@@ -228,16 +239,7 @@ class Stats:
                                     command=lambda: self.export(calc_stats))
         self.export_button.grid(row=0, column=0)
 
-        # Dismiss Button
-        self.dismiss_button = Button(self.export_dismiss_frame, text="Dismiss",
-                                    font="arial 10 bold",
-                                    command=partial(self.close_stats, partner))
-        self.dismiss_button.grid(row=0, column=1)
 
-    def close_stats(self, partner):
-        # Put stats button back to normal..
-        partner.stats_button.config(state=NORMAL)
-        self.stats_box.destroy()
 
 # Main Routine
 if __name__ == "__main__":
