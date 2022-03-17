@@ -229,7 +229,7 @@ class Game:
 
         # Stats button
         self.stats_button = Button(self.help_export_frame, text="Game Stats", font=("Arial 14 bold"),
-                                   bg="blue", fg="white", asdasd
+                                   bg="blue", fg="white", 
                                    command=lambda: self.to_stats(self.round_stats_list))
         self.stats_button.grid(row=0, column=2, padx=2)
 
@@ -328,6 +328,9 @@ class Game:
     def help(self):
         get_help = Help(self)
         get_help.help_text.configure(text="Help text goes here")
+
+    def to_stats(self, game_history, game_stats):
+        GameStats(self, game_history, game_stats)
 
 
 class Help:
