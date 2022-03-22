@@ -485,7 +485,7 @@ class GameStats:
         # Export Button
         self.export_button = Button(self.export_dismiss_frame, text="Export",
                                     font="arial 10 bold",
-                                    command=lambda: self.export(calc_stats))
+                                    command=lambda: self.export())
         self.export_button.grid(row=0, column=0)
 
         # Dismiss Button
