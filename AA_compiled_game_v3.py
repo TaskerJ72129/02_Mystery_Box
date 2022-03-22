@@ -271,7 +271,6 @@ class Game:
                 prize_list = "lead ($0)"
                 
 
-
             prizes.append(prize)
             stats_prizes.append(prize_list)
 
@@ -388,7 +387,6 @@ class GameStats:
         self.stats_box = Toplevel()
 
         # If users press cross at top, closes help and 'releases' help button
-
         self.stats_protocol('WM_DELETE_WINDOW', partial(self.close_stats, partner))
 
         # Set up GUI Frame
@@ -489,5 +487,6 @@ class GameStats:
 # Main Routine
 if __name__ == "__main__":
     root= Tk() 
+    root.title("Mystery Box Game")
     something = Start(root)
     root.mainloop()
