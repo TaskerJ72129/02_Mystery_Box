@@ -332,6 +332,7 @@ class Game:
         GameStats(self, game_history, game_stats)
 
 
+
 class Help:
     def __init__(self, partner):
 
@@ -435,11 +436,11 @@ class GameStats:
         if game_stats[1] > game_stats[0]:
             win_loss = "Amount Won:"
             amount = game_stats[1] - game_stats[0]
-            win_loss_fg = "green"
+            #win_loss_fg = "green"
         else:
             win_loss = "Amount Lost:"
             amount = game_stats[0] - game_stats[1]
-            win_loss_fg = "#660000"
+            #win_loss_fg = "#660000"
 
         # Amount won / lost (row 2.3)
         self.win_loss_label = Label(self.details_frame, text=win_loss,
@@ -468,7 +469,6 @@ class GameStats:
                                     font="arial 10 bold",
                                     command=lambda: self.export())
         self.export_button.grid(row=0, column=0)
-
 
         # Dismiss Button
         self.dismiss_button = Button(self.export_dismiss_frame, text="Dismiss",

@@ -5,7 +5,7 @@ import random
  
 
 class Game:
-    def __init__(self):
+    def __init__(self, parent):
         
         # Formatting variables
         self.game_stats_list = [50, 6]
@@ -22,9 +22,9 @@ class Game:
         self.heading_label.grid(row=0)
 
         # Stats Button (row 1)
-        self.stats_button = Label(self.game_frame, text="Game Stats",
-                                   font="Arial 14 bold", padx=10, pady=10,
-                                   command=lambda: self.to_stats(self.round_stats_list))
+        self.stats_button = Button(self.game_frame, text="Game Stats",
+                                  font="Arial 14", padx=10, pady=10, 
+                                  command=lambda: self.to_stats(self.round_stats_list))
         self.stats_button.grid(row=1)
 
     def to_stats(self, game_history, game_stats):
@@ -94,11 +94,11 @@ class GameStats:
         if game_stats[1] > game_stats[0]:
             win_loss = "Amount Won:"
             amount = game_stats[1] - game_stats[0]
-            win_loss_fg = "green"
+            #win_loss_fg = "green"
         else:
             win_loss = "Amount Lost:"
             amount = game_stats[0] - game_stats[1]
-            win_loss_fg = "#660000"
+            #win_loss_fg = "#660000"
 
         # Amount won / lost (row 2.3)
         self.win_loss_label = Label(self.details_frame, text=win_loss,
@@ -122,13 +122,12 @@ class GameStats:
         self.dismiss_button = Button(self.export_dismiss_frame, text="Dismiss",
                                     font="arial 10 bold",
                                     command=partial(self.close_stats, partner))
-        self.dismiss_button.grid(row=0, column=1)
+        self.dismiss_button.grid(row=3, column=1)
 
     def close_stats(self, partner):
         # Put stats button back to normal..
         partner.stats_button.config(state=NORMAL)
         self.stats_box.destroy()
-
 
 
         
@@ -171,75 +170,6 @@ class Help:
         partner.help_button.config(state=NORMAL)
         self.help_box.destroy()
     
-   
-class Stats:
-    def __init__(self, partner, calc_stats):
-
-        background = "light blue"
-
-        # disable stats button
-        partner.stats_button.config(state=DISABLED)
-
-        # Sets up child window (stats box)
-        self.stats_box = Toplevel()
-
-        # If users press cross at top, closes stats and 'releases' stats button
-        self.stats_box.protocol('WM_DELETE_WINDOW', partial(self.close_stats, partner))
-
-        # Set up GUI Frame
-        self.stats_frame = Frame(self.stats_box, width=300, bg=background)
-        self.stats_frame.grid()
-
-        # Set up stats heading (row 0)
-        self.how_heading = Label(self.stats_frame, text="Calculation Stats",
-                                    font="arial 19 bold", bg=background)
-        self.how_heading.grid(row=0)
-
-        # stats text (label, row 1)
-        self.stats_text = Label(self.stats_frame, text="Here are your most recent "
-                                                           "calculations. Please use the "
-                                                           "export button to create a text "
-                                                           "file of all your calculations for"
-                                                           "this session",
-                                font="arial 10 italic", fg="maroon",
-                                justify=LEFT, width=40, bg=background,
-                                padx=10, pady=10)
-        self.stats_text.grid(row=1)
-
-        # Stats Output goes here... (row 2)
-
-        # Generate string from list of calculations
-        stats_string = ""
-
-        if len(calc_stats) >= 7:
-            for item in range(0, 7):
-                stats_string += calc_stats[len(calc_stats) - item - 1]+"\n"
-
-        else:
-            for item in calc_stats:
-                stats_string += calc_stats[len(calc_stats) - calc_stats.index(item) - 1] + "\n"
-                self.stats_text.config(text="Here is your calculation "
-                                              "stats. You can use the "
-                                              "export button to save this "
-                                              "data to a text file if " 
-                                              "desired", wrap=250)
-
-        # Label to display calculation stats to user
-        self.calc_label = Label(self.stats_frame, text=stats_string,
-                                bg=background, font="Arial 12", justify=LEFT)
-        self.calc_label.grid(row=2)
-
-        # Export / Dismiss button (row 3)
-        self.export_dismiss_frame = Frame(self.stats_frame)
-        self.export_dismiss_frame.grid(row=3, pady=10)
-
-        # Export Button
-        self.export_button = Button(self.export_dismiss_frame, text="Export",
-                                    font="arial 10 bold",
-                                    command=lambda: self.export(calc_stats))
-        self.export_button.grid(row=0, column=0)
-
-
 
 # Main Routine
 if __name__ == "__main__":
