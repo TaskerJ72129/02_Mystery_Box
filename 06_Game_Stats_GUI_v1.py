@@ -24,11 +24,12 @@ class Game:
         # Stats Button (row 1)
         self.stats_button = Button(self.game_frame, text="Game Stats",
                                   font="Arial 14", padx=10, pady=10, 
-                                  command=lambda: self.to_stats(self.round_stats_list))
+                                  command=lambda: self.to_stats(self.round_stats_list, self.game_stats_list))
         self.stats_button.grid(row=1)
 
     def to_stats(self, game_history, game_stats):
         GameStats(self, game_history, game_stats)
+
 
 class GameStats:
     def __init__(self, partner, game_history, game_stats):
@@ -46,7 +47,7 @@ class GameStats:
 
         # If users press cross at top, closes help and 'releases' help button
 
-        self.stats_protocol('WM_DELETE_WINDOW', partial(self.close_stats, partner))
+        self.stats_box.protocol('WM_DELETE_WINDOW', partial(self.close_stats, partner))
 
         # Set up GUI Frame
         self.stats_frame = Frame(self.stats_box)
@@ -129,47 +130,6 @@ class GameStats:
         partner.stats_button.config(state=NORMAL)
         self.stats_box.destroy()
 
-
-        
-class Help:
-    def __init__(self, partner):
-
-        background = "white smoke"
-
-        # disable help button
-        partner.help_button.config(state=DISABLED)
-
-        # Sets up child window (help box)
-        self.help_box = Toplevel()
-
-        # If users press cross at top, closes help and 'releases' help button
-        self.help_box.protocol('WM_DELETE_WINDOW', partial(self.close_help, partner))
-
-        # Set up GUI Frame
-        self.help_frame = Frame(self.help_box, width=300, bg=background)
-        self.help_frame.grid()
-
-        # Set up Help heading (row 0)
-        self.how_heading = Label(self.help_frame, text="Help / Rules",
-                                    font="arial 10 bold", bg=background)
-        self.how_heading.grid(row=0)
-
-        # Help text (label, row 1)
-        self.help_text = Label(self.help_frame, text="",
-                                justify=LEFT, width=40, bg=background, wrap=250)
-        self.help_text.grid(row=1)
-
-        # Dismiss button (row 2)
-        self.dismiss_btn = Button(self.help_frame, text="Dismiss", fg="white",
-                                    width=10, bg="#808080", font="arial 10 bold",
-                                    command=partial(self.close_help, partner))
-        self.dismiss_btn.grid(row=2, pady=10)
-
-    def close_help(self, partner):
-        # Put help button back to normal..
-        partner.help_button.config(state=NORMAL)
-        self.help_box.destroy()
-    
 
 # Main Routine
 if __name__ == "__main__":
