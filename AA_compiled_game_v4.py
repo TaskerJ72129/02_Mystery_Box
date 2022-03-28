@@ -144,8 +144,6 @@ class Start:
  
 class Game:
     def __init__(self, partner, stakes, starting_balance):
-        print(stakes)
-        print(starting_balance)
 
         # initialise variables 
         self.balance = IntVar()
@@ -164,7 +162,7 @@ class Game:
         self.game_box = Toplevel()
 
         # If users press cross at top, game quits
-        self.game_box.protocol('Wm_DELETE_WINDOW', self.to_quit)
+        self.game_box.protocol('WM_DELETE_WINDOW', self.to_quit)
 
         self.game_frame = Frame(self.game_box)
         self.game_frame.grid()
@@ -425,7 +423,6 @@ class GameStats:
         self.details_frame.grid(row=2)
 
         # Statrting balance (row 2.0)
-
         self.start_balance_label = Label(self.details_frame,
                                          text="Starting Balance:", font=heading,
                                          anchor="e")
@@ -589,6 +586,14 @@ class Export:
             print()
         
         else:
+            # Amount won / lost
+            if game_stats[1] > game_stats[0]:
+                win_loss = "Amount Won:"
+                amount = game_stats[1] - game_stats[0]
+            else:
+                win_loss = "Amount Lost:"
+                amount = game_stats[0] - game_stats[1]
+
             # If there are no errors, generate text file and close dialogue add .txt suffix
             filename = filename + ".txt"
 
@@ -598,12 +603,20 @@ class Export:
             # Heading for Stats
             f.write("Game Statistics\n\n")
 
-            # Game stats
-            for round in game_stats:
-                f.write("{}\n".format(round))
+            # Starting Balance
+            f.write("Starting Balance: ${}\n".format(game_stats[0]))
+
+            # Current Balance
+            f.write("Current Balance: ${}\n".format(game_stats[1]))
+
+            # amount won / lost
+            f.write("{} ${}\n".format(win_loss, amount))
+
+            # Rounds Played
+            f.write("Rounds played: {}\n".format(len(game_history)))
 
             # Heading for Rounds
-            f.write("\nRound Details\n\n")
+            f.write("\nFull Round Details\n\n")
 
             # add new line at end of each item
             for item in game_history:
