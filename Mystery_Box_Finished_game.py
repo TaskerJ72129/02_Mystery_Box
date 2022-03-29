@@ -498,7 +498,6 @@ class GameStats:
 
 class Export:
     def __init__(self, partner, game_history, all_game_stats):
-        print(game_history)
 
         # disable export button
         partner.export_button.config(state=DISABLED)
@@ -560,7 +559,6 @@ class Export:
         has_error = "no"
 
         filename = self.filename_entry.get()
-        print(filename)
 
         for letter in filename:
             if re.match(valid_char, letter):
